@@ -1,0 +1,23 @@
+{
+    "name": "fetch-script",
+    "version": "1.0.0",
+    "description": "script to fetch data for all app ids",
+    "main": "index.js",
+    "scripts": {
+        "dev": "node index.js"
+    },
+    "type": "module",
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "aws-sdk": "^2.1691.0",
+        "axios": "^1.7.7",
+        "cheerio": "^1.0.0",
+        "dateformat": "^5.0.3",
+        "google-play-scraper": "^10.1.2",
+        "knex": "^3.1.0",
+        "pg": "^8.12.0",
+        "unirest": "^0.6.0",
+        "uuid": "^10.0.0"
+    }
+}

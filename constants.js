@@ -1,0 +1,1 @@
+export const TOTAL_LIMIT_REVIEWS = 500;
