@@ -1,7 +1,7 @@
 {
     "name": "fetch-script",
     "version": "1.0.0",
-    "description": "script to fetch data for all app ids",
+    "description": "Contains all the essential scripts to fetch the apps data from play store",
     "main": "index.js",
     "scripts": {
         "dev": "node index.js"
@@ -10,6 +10,8 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
+        "@prisma/adapter-pg": "^7.3.0",
+        "@prisma/client": "^7.3.0",
         "aws-sdk": "^2.1693.0",
         "axios": "^1.13.4",
         "cheerio": "^1.2.0",
@@ -17,7 +19,13 @@
         "google-play-scraper": "^10.1.2",
         "knex": "^3.1.0",
         "pg": "^8.17.2",
-        "unirest": "^0.6.0",
         "uuid": "^13.0.0"
+    },
+    "devDependencies": {
+        "@types/dateformat": "^5.0.3",
+        "@types/pg": "^8.16.0",
+        "prisma": "^7.3.0",
+        "tsx": "^4.21.0",
+        "typescript": "^5.9.3"
     }
 }

@@ -13,7 +13,9 @@
 
 import { getSearchAppsData } from "./utils.js";
 
-const searchAppsData = await getSearchAppsData("com.lgsmartsolutions.radio945stationhoustonfmmusiconlinefreehd");
+const searchAppsData = await getSearchAppsData(
+    "com.lgsmartsolutions.radio945stationhoustonfmmusiconlinefreehd",
+);
 const appIds = [];
 for (const searchApp of searchAppsData) {
     appIds.push(searchApp.appId);

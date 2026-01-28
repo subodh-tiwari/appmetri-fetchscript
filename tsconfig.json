@@ -1,0 +1,39 @@
+{
+    "compilerOptions": {
+        /* Language & Output */
+        "target": "ES2022",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+
+        /* Paths & Output */
+        "rootDir": "./src",
+        "outDir": "./build",
+
+        /* ESM Compatibility */
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "verbatimModuleSyntax": true,
+
+        /* Strictness */
+        "strict": true,
+        "noImplicitAny": true,
+        "strictNullChecks": true,
+        "noUncheckedIndexedAccess": true,
+
+        /* Build Quality */
+        "forceConsistentCasingInFileNames": true,
+        "declaration": true,
+        "skipLibCheck": true,
+
+        /* Source Maps */
+        "sourceMap": true,
+
+        /* Performance */
+        "incremental": true,
+
+        /* Node Globals */
+        "types": ["node"]
+    },
+    "include": ["src/**/*.ts"],
+    "exclude": ["node_modules", "build"]
+}

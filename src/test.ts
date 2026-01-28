@@ -1,3 +1,4 @@
+import type { PoolClient } from "pg";
 import {
     getAllAppIds,
     getNAAppByAppId,
@@ -29,9 +30,10 @@ import {
     delay,
     shuffleArray,
 } from "./utils.js";
+import type { Model } from "typings";
 
-const storeApps = async (clientGPS) => {
-    const res = await clientGPS.query('SELECT app_id FROM all_unique_apps');
+const storeApps = async (clientGPS: PoolClient) => {
+    const res = await clientGPS.query("SELECT app_id FROM all_unique_apps");
     for (const val of res.rows) {
         try {
             const app = await getAppByAppId(clientGPS, val.app_id);
@@ -59,17 +61,18 @@ const storeApps = async (clientGPS) => {
             }
             console.log("NEW => ", val.app_id);
 
-            let allApps = [];
+            let allApps: Model.AppsData[] = [];
             allApps.push(primaryAppData);
 
             // developer
-            const developerMappingData = await getDeveloperMapping(primaryAppData);
+            const developerMappingData =
+                await getDeveloperMapping(primaryAppData);
             const { keys: developerKeys, values: developerValues } =
                 await getKeysAndValues(developerMappingData);
 
             let developer = await getDeveloperByDeveloperId(
                 clientGPS,
-                developerMappingData.developer_id
+                developerMappingData.developer_id as string,
             );
             // console.log(
             //   `no: ${no}, developer: ${developerMappingData.developer_id}`,
@@ -80,13 +83,13 @@ const storeApps = async (clientGPS) => {
                     clientGPS,
                     "developers",
                     developerKeys,
-                    [developerValues]
+                    [developerValues],
                 );
 
                 // fetch all apps under the developer
 
                 const developerAppsData = await getDeveloperAppsData(
-                    primaryAppData.developer
+                    primaryAppData.developer as string,
                 );
                 allApps = allApps.concat(developerAppsData);
             }
@@ -103,8 +106,8 @@ const storeApps = async (clientGPS) => {
                 // fetch phone number of the app's developer
                 const phoneNumber = app.appId
                     ? await getPlayStorePhoneNumber(
-                        `https://play.google.com/store/apps/details?id=${app.appId}`
-                    )
+                          `https://play.google.com/store/apps/details?id=${app.appId}`,
+                      )
                     : "";
 
                 // apps
@@ -112,14 +115,16 @@ const storeApps = async (clientGPS) => {
                 const appsMappingData = await getAppsMapping(
                     app,
                     developer[0].id,
-                    phoneNumber
+                    phoneNumber,
                 );
-                const { keys: appKeys, values: appValues } = await getKeysAndValues(
-                    appsMappingData
+                const { keys: appKeys, values: appValues } =
+                    await getKeysAndValues(appsMappingData);
+                const storedApp = await insertMultipleRows(
+                    clientGPS,
+                    "apps",
+                    appKeys,
+                    [appValues],
                 );
-                const storedApp = await insertMultipleRows(clientGPS, "apps", appKeys, [
-                    appValues,
-                ]);
 
                 // // ads_txt
                 // if (app.developerWebsite !== undefined) {
@@ -133,17 +138,23 @@ const storeApps = async (clientGPS) => {
 
                 // installs
                 if (app.maxInstalls !== undefined) {
-                    const oldInstalls = await getOldInstalls(clientGPS, storedApp[0].id);
+                    const oldInstalls = await getOldInstalls(
+                        clientGPS,
+                        storedApp[0].id,
+                    );
                     const installsMappingData = await getAppInstallsMapping(
                         storedApp[0].id,
                         app,
-                        oldInstalls
+                        oldInstalls,
                     );
                     const { keys: installsKeys, values: installsValues } =
                         await getKeysAndValues(installsMappingData);
-                    await insertMultipleRows(clientGPS, "installs", installsKeys, [
-                        installsValues,
-                    ]);
+                    await insertMultipleRows(
+                        clientGPS,
+                        "installs",
+                        installsKeys,
+                        [installsValues],
+                    );
                 }
 
                 // // permissions
@@ -158,13 +169,16 @@ const storeApps = async (clientGPS) => {
                 if (app.score !== undefined || app.ratings !== undefined) {
                     const appRatingsMappingData = await getAppRatingsMapping(
                         storedApp[0].id,
-                        app
+                        app,
                     );
                     const { keys: appRatingsKeys, values: appRatingsValues } =
                         await getKeysAndValues(appRatingsMappingData);
-                    await insertMultipleRows(clientGPS, "ratings", appRatingsKeys, [
-                        appRatingsValues,
-                    ]);
+                    await insertMultipleRows(
+                        clientGPS,
+                        "ratings",
+                        appRatingsKeys,
+                        [appRatingsValues],
+                    );
                 }
 
                 // // reviews
@@ -181,21 +195,26 @@ const storeApps = async (clientGPS) => {
                 if (app.recentChanges !== undefined) {
                     const appChangelogsMappingData = await getChangelogsMapping(
                         storedApp[0].id,
-                        app
+                        app,
                     );
-                    const { keys: appChangelogsKeys, values: appChangelogsValues } =
-                        await getKeysAndValues(appChangelogsMappingData);
-                    await insertMultipleRows(clientGPS, "changelogs", appChangelogsKeys, [
-                        appChangelogsValues,
-                    ]);
+                    const {
+                        keys: appChangelogsKeys,
+                        values: appChangelogsValues,
+                    } = await getKeysAndValues(appChangelogsMappingData);
+                    await insertMultipleRows(
+                        clientGPS,
+                        "changelogs",
+                        appChangelogsKeys,
+                        [appChangelogsValues],
+                    );
                 }
             }
             await clientGPS.query("COMMIT");
-        } catch (error) {
+        } catch (error: any) {
             await clientGPS.query("ROLLBACK");
             console.error(
                 `Transaction failed and rolled backed for ${val.app_id} => `,
-                error.stack
+                error.stack,
             );
         }
     }

@@ -1,0 +1,232 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model ads_txt {
+  id          Int       @id @default(autoincrement())
+  app_id      Int
+  ad_networks Json?
+  created_at  DateTime? @default(now()) @db.Timestamp(6)
+  apps        apps      @relation(fields: [app_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model all_unique_apps {
+  app_id String
+  id     Int    @default(autoincrement())
+
+  @@ignore
+}
+
+model apps {
+  id                         Int              @id @default(autoincrement())
+  app_id                     String           @unique
+  developer_id               Int?
+  name                       String?
+  url                        String?
+  phone_number               String?          @db.VarChar(15)
+  email                      String?
+  address                    String?
+  website                    String?
+  description                String?
+  summary                    String?
+  total_ratings              Int?
+  min_installs               BigInt?
+  max_installs               BigInt?
+  price                      Decimal?         @db.Decimal(12, 6)
+  free                       Boolean?
+  currency                   String?
+  available                  Boolean?
+  offers_iap                 String?
+  iap_range                  String?
+  android_version            String?
+  android_max_version        String?
+  privacy_policy             String?
+  category                   String?
+  icon                       String?
+  header_image               String?
+  screenshots                String?
+  video                      String?
+  video_image                String?
+  preview_video              String?
+  content_rating             String?
+  content_rating_description String?
+  ad_supported               Boolean?
+  released                   String?
+  last_updated_at            DateTime?        @db.Timestamp(6)
+  version                    String?
+  recent_changes             String?
+  comments                   String[]
+  preregister                Boolean?
+  is_available_in_play_store Boolean?
+  early_access_enabled       Boolean?
+  created_at                 DateTime?        @default(now()) @db.Timestamp(6)
+  updated_at                 DateTime?        @default(now()) @db.Timestamp(6)
+  ads_txt                    ads_txt[]
+  developers                 developers?      @relation(fields: [developer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  categories                 categories[]
+  changelogs                 changelogs[]
+  countries                  countries[]
+  iab_categories             iab_categories[]
+  installs                   installs[]
+  languages                  languages[]
+  permissions                permissions[]
+  ratings                    ratings[]
+  reviews                    reviews[]
+  top_charts                 top_charts[]
+}
+
+model categories {
+  id         Int       @id @default(autoincrement())
+  app_id     Int
+  category   String?
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  apps       apps      @relation(fields: [app_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([app_id, category])
+}
+
+model changelogs {
+  id         Int       @id @default(autoincrement())
+  app_id     Int
+  changelog  String?
+  changes_on DateTime? @db.Timestamp(6)
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  apps       apps      @relation(fields: [app_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model countries {
+  id         Int       @id @default(autoincrement())
+  app_id     Int
+  country    String
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  apps       apps      @relation(fields: [app_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([app_id, country])
+}
+
+model developers {
+  id           Int       @id @default(autoincrement())
+  developer_id String    @unique
+  internal_id  String?
+  name         String?
+  created_at   DateTime? @default(now()) @db.Timestamp(6)
+  updated_at   DateTime? @default(now()) @db.Timestamp(6)
+  apps         apps[]
+}
+
+model developers_old {
+  id           Int    @default(autoincrement())
+  developer_id String @unique(map: "developers_data_old_developer_id_key")
+}
+
+model google_play_store_categories {
+  id            Int       @id @default(autoincrement())
+  category_key  String    @unique
+  category_name String    @unique
+  updated_at    DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model iab_categories {
+  id           Int       @id @default(autoincrement())
+  app_id       Int
+  iab_category String
+  created_at   DateTime? @default(now()) @db.Timestamp(6)
+  apps         apps      @relation(fields: [app_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([app_id, iab_category])
+}
+
+model installs {
+  id               Int       @id @default(autoincrement())
+  app_id           Int
+  change           BigInt?
+  current_installs BigInt?
+  created_at       DateTime? @default(now()) @db.Timestamp(6)
+  apps             apps      @relation(fields: [app_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model languages {
+  id         Int       @id @default(autoincrement())
+  app_id     Int
+  language   String
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  apps       apps      @relation(fields: [app_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([app_id, language])
+}
+
+model na_apps {
+  id     Int    @id @default(autoincrement())
+  app_id String @unique
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model na_apps_copy {
+  id     Int?
+  app_id String?
+
+  @@ignore
+}
+
+model permissions {
+  id          Int       @id @default(autoincrement())
+  app_id      Int
+  permissions Json?
+  created_at  DateTime? @default(now()) @db.Timestamp(6)
+  apps        apps      @relation(fields: [app_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model ratings {
+  id          Int       @id @default(autoincrement())
+  app_id      Int
+  score       Decimal?  @db.Decimal(7, 6)
+  total_count BigInt?
+  rating_1    BigInt?
+  rating_2    BigInt?
+  rating_3    BigInt?
+  rating_4    BigInt?
+  rating_5    BigInt?
+  created_at  DateTime? @default(now()) @db.Timestamp(6)
+  apps        apps      @relation(fields: [app_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model reviews {
+  id          Int       @id @default(autoincrement())
+  app_id      Int
+  review      String?
+  reviewed_on DateTime? @db.Timestamp(6)
+  sentiment   String?
+  review_info Json?
+  created_at  DateTime? @default(now()) @db.Timestamp(6)
+  apps        apps      @relation(fields: [app_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model top_charts {
+  id         Int       @id @default(autoincrement())
+  app_id     Int
+  chart_name String
+  ranking    Int
+  date       DateTime  @db.Date
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  apps       apps      @relation(fields: [app_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model users {
+  id              Int       @id @default(autoincrement())
+  first_name      String
+  last_name       String
+  email           String    @unique @db.Citext
+  company_name    String
+  company_website String
+  password        String
+  api_key         String    @unique
+  is_active       Boolean   @default(false)
+  created_at      DateTime? @default(now()) @db.Timestamp(6)
+  updated_at      DateTime? @default(now()) @db.Timestamp(6)
+}
