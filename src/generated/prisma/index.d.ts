@@ -3597,7 +3597,7 @@ export namespace Prisma {
     free: boolean | null
     currency: string | null
     available: boolean | null
-    offers_iap: string | null
+    offers_iap: boolean | null
     iap_range: string | null
     android_version: string | null
     android_max_version: string | null
@@ -3642,7 +3642,7 @@ export namespace Prisma {
     free: boolean | null
     currency: string | null
     available: boolean | null
-    offers_iap: string | null
+    offers_iap: boolean | null
     iap_range: string | null
     android_version: string | null
     android_max_version: string | null
@@ -3976,7 +3976,7 @@ export namespace Prisma {
     free: boolean | null
     currency: string | null
     available: boolean | null
-    offers_iap: string | null
+    offers_iap: boolean | null
     iap_range: string | null
     android_version: string | null
     android_max_version: string | null
@@ -4279,7 +4279,7 @@ export namespace Prisma {
       free: boolean | null
       currency: string | null
       available: boolean | null
-      offers_iap: string | null
+      offers_iap: boolean | null
       iap_range: string | null
       android_version: string | null
       android_max_version: string | null
@@ -4757,7 +4757,7 @@ export namespace Prisma {
     readonly free: FieldRef<"apps", 'Boolean'>
     readonly currency: FieldRef<"apps", 'String'>
     readonly available: FieldRef<"apps", 'Boolean'>
-    readonly offers_iap: FieldRef<"apps", 'String'>
+    readonly offers_iap: FieldRef<"apps", 'Boolean'>
     readonly iap_range: FieldRef<"apps", 'String'>
     readonly android_version: FieldRef<"apps", 'String'>
     readonly android_max_version: FieldRef<"apps", 'String'>
@@ -22199,7 +22199,7 @@ export namespace Prisma {
     free?: BoolNullableFilter<"apps"> | boolean | null
     currency?: StringNullableFilter<"apps"> | string | null
     available?: BoolNullableFilter<"apps"> | boolean | null
-    offers_iap?: StringNullableFilter<"apps"> | string | null
+    offers_iap?: BoolNullableFilter<"apps"> | boolean | null
     iap_range?: StringNullableFilter<"apps"> | string | null
     android_version?: StringNullableFilter<"apps"> | string | null
     android_max_version?: StringNullableFilter<"apps"> | string | null
@@ -22318,7 +22318,7 @@ export namespace Prisma {
     free?: BoolNullableFilter<"apps"> | boolean | null
     currency?: StringNullableFilter<"apps"> | string | null
     available?: BoolNullableFilter<"apps"> | boolean | null
-    offers_iap?: StringNullableFilter<"apps"> | string | null
+    offers_iap?: BoolNullableFilter<"apps"> | boolean | null
     iap_range?: StringNullableFilter<"apps"> | string | null
     android_version?: StringNullableFilter<"apps"> | string | null
     android_max_version?: StringNullableFilter<"apps"> | string | null
@@ -22430,7 +22430,7 @@ export namespace Prisma {
     free?: BoolNullableWithAggregatesFilter<"apps"> | boolean | null
     currency?: StringNullableWithAggregatesFilter<"apps"> | string | null
     available?: BoolNullableWithAggregatesFilter<"apps"> | boolean | null
-    offers_iap?: StringNullableWithAggregatesFilter<"apps"> | string | null
+    offers_iap?: BoolNullableWithAggregatesFilter<"apps"> | boolean | null
     iap_range?: StringNullableWithAggregatesFilter<"apps"> | string | null
     android_version?: StringNullableWithAggregatesFilter<"apps"> | string | null
     android_max_version?: StringNullableWithAggregatesFilter<"apps"> | string | null
@@ -23381,7 +23381,7 @@ export namespace Prisma {
     free?: boolean | null
     currency?: string | null
     available?: boolean | null
-    offers_iap?: string | null
+    offers_iap?: boolean | null
     iap_range?: string | null
     android_version?: string | null
     android_max_version?: string | null
@@ -23439,7 +23439,7 @@ export namespace Prisma {
     free?: boolean | null
     currency?: string | null
     available?: boolean | null
-    offers_iap?: string | null
+    offers_iap?: boolean | null
     iap_range?: string | null
     android_version?: string | null
     android_max_version?: string | null
@@ -23494,7 +23494,7 @@ export namespace Prisma {
     free?: NullableBoolFieldUpdateOperationsInput | boolean | null
     currency?: NullableStringFieldUpdateOperationsInput | string | null
     available?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    offers_iap?: NullableStringFieldUpdateOperationsInput | string | null
+    offers_iap?: NullableBoolFieldUpdateOperationsInput | boolean | null
     iap_range?: NullableStringFieldUpdateOperationsInput | string | null
     android_version?: NullableStringFieldUpdateOperationsInput | string | null
     android_max_version?: NullableStringFieldUpdateOperationsInput | string | null
@@ -23552,7 +23552,7 @@ export namespace Prisma {
     free?: NullableBoolFieldUpdateOperationsInput | boolean | null
     currency?: NullableStringFieldUpdateOperationsInput | string | null
     available?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    offers_iap?: NullableStringFieldUpdateOperationsInput | string | null
+    offers_iap?: NullableBoolFieldUpdateOperationsInput | boolean | null
     iap_range?: NullableStringFieldUpdateOperationsInput | string | null
     android_version?: NullableStringFieldUpdateOperationsInput | string | null
     android_max_version?: NullableStringFieldUpdateOperationsInput | string | null
@@ -23609,7 +23609,7 @@ export namespace Prisma {
     free?: boolean | null
     currency?: string | null
     available?: boolean | null
-    offers_iap?: string | null
+    offers_iap?: boolean | null
     iap_range?: string | null
     android_version?: string | null
     android_max_version?: string | null
@@ -23653,7 +23653,7 @@ export namespace Prisma {
     free?: NullableBoolFieldUpdateOperationsInput | boolean | null
     currency?: NullableStringFieldUpdateOperationsInput | string | null
     available?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    offers_iap?: NullableStringFieldUpdateOperationsInput | string | null
+    offers_iap?: NullableBoolFieldUpdateOperationsInput | boolean | null
     iap_range?: NullableStringFieldUpdateOperationsInput | string | null
     android_version?: NullableStringFieldUpdateOperationsInput | string | null
     android_max_version?: NullableStringFieldUpdateOperationsInput | string | null
@@ -23699,7 +23699,7 @@ export namespace Prisma {
     free?: NullableBoolFieldUpdateOperationsInput | boolean | null
     currency?: NullableStringFieldUpdateOperationsInput | string | null
     available?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    offers_iap?: NullableStringFieldUpdateOperationsInput | string | null
+    offers_iap?: NullableBoolFieldUpdateOperationsInput | boolean | null
     iap_range?: NullableStringFieldUpdateOperationsInput | string | null
     android_version?: NullableStringFieldUpdateOperationsInput | string | null
     android_max_version?: NullableStringFieldUpdateOperationsInput | string | null
@@ -26756,7 +26756,7 @@ export namespace Prisma {
     free?: boolean | null
     currency?: string | null
     available?: boolean | null
-    offers_iap?: string | null
+    offers_iap?: boolean | null
     iap_range?: string | null
     android_version?: string | null
     android_max_version?: string | null
@@ -26813,7 +26813,7 @@ export namespace Prisma {
     free?: boolean | null
     currency?: string | null
     available?: boolean | null
-    offers_iap?: string | null
+    offers_iap?: boolean | null
     iap_range?: string | null
     android_version?: string | null
     android_max_version?: string | null
@@ -26883,7 +26883,7 @@ export namespace Prisma {
     free?: NullableBoolFieldUpdateOperationsInput | boolean | null
     currency?: NullableStringFieldUpdateOperationsInput | string | null
     available?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    offers_iap?: NullableStringFieldUpdateOperationsInput | string | null
+    offers_iap?: NullableBoolFieldUpdateOperationsInput | boolean | null
     iap_range?: NullableStringFieldUpdateOperationsInput | string | null
     android_version?: NullableStringFieldUpdateOperationsInput | string | null
     android_max_version?: NullableStringFieldUpdateOperationsInput | string | null
@@ -26940,7 +26940,7 @@ export namespace Prisma {
     free?: NullableBoolFieldUpdateOperationsInput | boolean | null
     currency?: NullableStringFieldUpdateOperationsInput | string | null
     available?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    offers_iap?: NullableStringFieldUpdateOperationsInput | string | null
+    offers_iap?: NullableBoolFieldUpdateOperationsInput | boolean | null
     iap_range?: NullableStringFieldUpdateOperationsInput | string | null
     android_version?: NullableStringFieldUpdateOperationsInput | string | null
     android_max_version?: NullableStringFieldUpdateOperationsInput | string | null
@@ -27600,7 +27600,7 @@ export namespace Prisma {
     free?: boolean | null
     currency?: string | null
     available?: boolean | null
-    offers_iap?: string | null
+    offers_iap?: boolean | null
     iap_range?: string | null
     android_version?: string | null
     android_max_version?: string | null
@@ -27657,7 +27657,7 @@ export namespace Prisma {
     free?: boolean | null
     currency?: string | null
     available?: boolean | null
-    offers_iap?: string | null
+    offers_iap?: boolean | null
     iap_range?: string | null
     android_version?: string | null
     android_max_version?: string | null
@@ -27727,7 +27727,7 @@ export namespace Prisma {
     free?: NullableBoolFieldUpdateOperationsInput | boolean | null
     currency?: NullableStringFieldUpdateOperationsInput | string | null
     available?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    offers_iap?: NullableStringFieldUpdateOperationsInput | string | null
+    offers_iap?: NullableBoolFieldUpdateOperationsInput | boolean | null
     iap_range?: NullableStringFieldUpdateOperationsInput | string | null
     android_version?: NullableStringFieldUpdateOperationsInput | string | null
     android_max_version?: NullableStringFieldUpdateOperationsInput | string | null
@@ -27784,7 +27784,7 @@ export namespace Prisma {
     free?: NullableBoolFieldUpdateOperationsInput | boolean | null
     currency?: NullableStringFieldUpdateOperationsInput | string | null
     available?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    offers_iap?: NullableStringFieldUpdateOperationsInput | string | null
+    offers_iap?: NullableBoolFieldUpdateOperationsInput | boolean | null
     iap_range?: NullableStringFieldUpdateOperationsInput | string | null
     android_version?: NullableStringFieldUpdateOperationsInput | string | null
     android_max_version?: NullableStringFieldUpdateOperationsInput | string | null
@@ -27838,7 +27838,7 @@ export namespace Prisma {
     free?: boolean | null
     currency?: string | null
     available?: boolean | null
-    offers_iap?: string | null
+    offers_iap?: boolean | null
     iap_range?: string | null
     android_version?: string | null
     android_max_version?: string | null
@@ -27895,7 +27895,7 @@ export namespace Prisma {
     free?: boolean | null
     currency?: string | null
     available?: boolean | null
-    offers_iap?: string | null
+    offers_iap?: boolean | null
     iap_range?: string | null
     android_version?: string | null
     android_max_version?: string | null
@@ -27965,7 +27965,7 @@ export namespace Prisma {
     free?: NullableBoolFieldUpdateOperationsInput | boolean | null
     currency?: NullableStringFieldUpdateOperationsInput | string | null
     available?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    offers_iap?: NullableStringFieldUpdateOperationsInput | string | null
+    offers_iap?: NullableBoolFieldUpdateOperationsInput | boolean | null
     iap_range?: NullableStringFieldUpdateOperationsInput | string | null
     android_version?: NullableStringFieldUpdateOperationsInput | string | null
     android_max_version?: NullableStringFieldUpdateOperationsInput | string | null
@@ -28022,7 +28022,7 @@ export namespace Prisma {
     free?: NullableBoolFieldUpdateOperationsInput | boolean | null
     currency?: NullableStringFieldUpdateOperationsInput | string | null
     available?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    offers_iap?: NullableStringFieldUpdateOperationsInput | string | null
+    offers_iap?: NullableBoolFieldUpdateOperationsInput | boolean | null
     iap_range?: NullableStringFieldUpdateOperationsInput | string | null
     android_version?: NullableStringFieldUpdateOperationsInput | string | null
     android_max_version?: NullableStringFieldUpdateOperationsInput | string | null
@@ -28076,7 +28076,7 @@ export namespace Prisma {
     free?: boolean | null
     currency?: string | null
     available?: boolean | null
-    offers_iap?: string | null
+    offers_iap?: boolean | null
     iap_range?: string | null
     android_version?: string | null
     android_max_version?: string | null
@@ -28133,7 +28133,7 @@ export namespace Prisma {
     free?: boolean | null
     currency?: string | null
     available?: boolean | null
-    offers_iap?: string | null
+    offers_iap?: boolean | null
     iap_range?: string | null
     android_version?: string | null
     android_max_version?: string | null
@@ -28203,7 +28203,7 @@ export namespace Prisma {
     free?: NullableBoolFieldUpdateOperationsInput | boolean | null
     currency?: NullableStringFieldUpdateOperationsInput | string | null
     available?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    offers_iap?: NullableStringFieldUpdateOperationsInput | string | null
+    offers_iap?: NullableBoolFieldUpdateOperationsInput | boolean | null
     iap_range?: NullableStringFieldUpdateOperationsInput | string | null
     android_version?: NullableStringFieldUpdateOperationsInput | string | null
     android_max_version?: NullableStringFieldUpdateOperationsInput | string | null
@@ -28260,7 +28260,7 @@ export namespace Prisma {
     free?: NullableBoolFieldUpdateOperationsInput | boolean | null
     currency?: NullableStringFieldUpdateOperationsInput | string | null
     available?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    offers_iap?: NullableStringFieldUpdateOperationsInput | string | null
+    offers_iap?: NullableBoolFieldUpdateOperationsInput | boolean | null
     iap_range?: NullableStringFieldUpdateOperationsInput | string | null
     android_version?: NullableStringFieldUpdateOperationsInput | string | null
     android_max_version?: NullableStringFieldUpdateOperationsInput | string | null
@@ -28314,7 +28314,7 @@ export namespace Prisma {
     free?: boolean | null
     currency?: string | null
     available?: boolean | null
-    offers_iap?: string | null
+    offers_iap?: boolean | null
     iap_range?: string | null
     android_version?: string | null
     android_max_version?: string | null
@@ -28370,7 +28370,7 @@ export namespace Prisma {
     free?: boolean | null
     currency?: string | null
     available?: boolean | null
-    offers_iap?: string | null
+    offers_iap?: boolean | null
     iap_range?: string | null
     android_version?: string | null
     android_max_version?: string | null
@@ -28456,7 +28456,7 @@ export namespace Prisma {
     free?: BoolNullableFilter<"apps"> | boolean | null
     currency?: StringNullableFilter<"apps"> | string | null
     available?: BoolNullableFilter<"apps"> | boolean | null
-    offers_iap?: StringNullableFilter<"apps"> | string | null
+    offers_iap?: BoolNullableFilter<"apps"> | boolean | null
     iap_range?: StringNullableFilter<"apps"> | string | null
     android_version?: StringNullableFilter<"apps"> | string | null
     android_max_version?: StringNullableFilter<"apps"> | string | null
@@ -28500,7 +28500,7 @@ export namespace Prisma {
     free?: boolean | null
     currency?: string | null
     available?: boolean | null
-    offers_iap?: string | null
+    offers_iap?: boolean | null
     iap_range?: string | null
     android_version?: string | null
     android_max_version?: string | null
@@ -28557,7 +28557,7 @@ export namespace Prisma {
     free?: boolean | null
     currency?: string | null
     available?: boolean | null
-    offers_iap?: string | null
+    offers_iap?: boolean | null
     iap_range?: string | null
     android_version?: string | null
     android_max_version?: string | null
@@ -28627,7 +28627,7 @@ export namespace Prisma {
     free?: NullableBoolFieldUpdateOperationsInput | boolean | null
     currency?: NullableStringFieldUpdateOperationsInput | string | null
     available?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    offers_iap?: NullableStringFieldUpdateOperationsInput | string | null
+    offers_iap?: NullableBoolFieldUpdateOperationsInput | boolean | null
     iap_range?: NullableStringFieldUpdateOperationsInput | string | null
     android_version?: NullableStringFieldUpdateOperationsInput | string | null
     android_max_version?: NullableStringFieldUpdateOperationsInput | string | null
@@ -28684,7 +28684,7 @@ export namespace Prisma {
     free?: NullableBoolFieldUpdateOperationsInput | boolean | null
     currency?: NullableStringFieldUpdateOperationsInput | string | null
     available?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    offers_iap?: NullableStringFieldUpdateOperationsInput | string | null
+    offers_iap?: NullableBoolFieldUpdateOperationsInput | boolean | null
     iap_range?: NullableStringFieldUpdateOperationsInput | string | null
     android_version?: NullableStringFieldUpdateOperationsInput | string | null
     android_max_version?: NullableStringFieldUpdateOperationsInput | string | null
@@ -28738,7 +28738,7 @@ export namespace Prisma {
     free?: boolean | null
     currency?: string | null
     available?: boolean | null
-    offers_iap?: string | null
+    offers_iap?: boolean | null
     iap_range?: string | null
     android_version?: string | null
     android_max_version?: string | null
@@ -28795,7 +28795,7 @@ export namespace Prisma {
     free?: boolean | null
     currency?: string | null
     available?: boolean | null
-    offers_iap?: string | null
+    offers_iap?: boolean | null
     iap_range?: string | null
     android_version?: string | null
     android_max_version?: string | null
@@ -28865,7 +28865,7 @@ export namespace Prisma {
     free?: NullableBoolFieldUpdateOperationsInput | boolean | null
     currency?: NullableStringFieldUpdateOperationsInput | string | null
     available?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    offers_iap?: NullableStringFieldUpdateOperationsInput | string | null
+    offers_iap?: NullableBoolFieldUpdateOperationsInput | boolean | null
     iap_range?: NullableStringFieldUpdateOperationsInput | string | null
     android_version?: NullableStringFieldUpdateOperationsInput | string | null
     android_max_version?: NullableStringFieldUpdateOperationsInput | string | null
@@ -28922,7 +28922,7 @@ export namespace Prisma {
     free?: NullableBoolFieldUpdateOperationsInput | boolean | null
     currency?: NullableStringFieldUpdateOperationsInput | string | null
     available?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    offers_iap?: NullableStringFieldUpdateOperationsInput | string | null
+    offers_iap?: NullableBoolFieldUpdateOperationsInput | boolean | null
     iap_range?: NullableStringFieldUpdateOperationsInput | string | null
     android_version?: NullableStringFieldUpdateOperationsInput | string | null
     android_max_version?: NullableStringFieldUpdateOperationsInput | string | null
@@ -28976,7 +28976,7 @@ export namespace Prisma {
     free?: boolean | null
     currency?: string | null
     available?: boolean | null
-    offers_iap?: string | null
+    offers_iap?: boolean | null
     iap_range?: string | null
     android_version?: string | null
     android_max_version?: string | null
@@ -29033,7 +29033,7 @@ export namespace Prisma {
     free?: boolean | null
     currency?: string | null
     available?: boolean | null
-    offers_iap?: string | null
+    offers_iap?: boolean | null
     iap_range?: string | null
     android_version?: string | null
     android_max_version?: string | null
@@ -29103,7 +29103,7 @@ export namespace Prisma {
     free?: NullableBoolFieldUpdateOperationsInput | boolean | null
     currency?: NullableStringFieldUpdateOperationsInput | string | null
     available?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    offers_iap?: NullableStringFieldUpdateOperationsInput | string | null
+    offers_iap?: NullableBoolFieldUpdateOperationsInput | boolean | null
     iap_range?: NullableStringFieldUpdateOperationsInput | string | null
     android_version?: NullableStringFieldUpdateOperationsInput | string | null
     android_max_version?: NullableStringFieldUpdateOperationsInput | string | null
@@ -29160,7 +29160,7 @@ export namespace Prisma {
     free?: NullableBoolFieldUpdateOperationsInput | boolean | null
     currency?: NullableStringFieldUpdateOperationsInput | string | null
     available?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    offers_iap?: NullableStringFieldUpdateOperationsInput | string | null
+    offers_iap?: NullableBoolFieldUpdateOperationsInput | boolean | null
     iap_range?: NullableStringFieldUpdateOperationsInput | string | null
     android_version?: NullableStringFieldUpdateOperationsInput | string | null
     android_max_version?: NullableStringFieldUpdateOperationsInput | string | null
@@ -29214,7 +29214,7 @@ export namespace Prisma {
     free?: boolean | null
     currency?: string | null
     available?: boolean | null
-    offers_iap?: string | null
+    offers_iap?: boolean | null
     iap_range?: string | null
     android_version?: string | null
     android_max_version?: string | null
@@ -29271,7 +29271,7 @@ export namespace Prisma {
     free?: boolean | null
     currency?: string | null
     available?: boolean | null
-    offers_iap?: string | null
+    offers_iap?: boolean | null
     iap_range?: string | null
     android_version?: string | null
     android_max_version?: string | null
@@ -29341,7 +29341,7 @@ export namespace Prisma {
     free?: NullableBoolFieldUpdateOperationsInput | boolean | null
     currency?: NullableStringFieldUpdateOperationsInput | string | null
     available?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    offers_iap?: NullableStringFieldUpdateOperationsInput | string | null
+    offers_iap?: NullableBoolFieldUpdateOperationsInput | boolean | null
     iap_range?: NullableStringFieldUpdateOperationsInput | string | null
     android_version?: NullableStringFieldUpdateOperationsInput | string | null
     android_max_version?: NullableStringFieldUpdateOperationsInput | string | null
@@ -29398,7 +29398,7 @@ export namespace Prisma {
     free?: NullableBoolFieldUpdateOperationsInput | boolean | null
     currency?: NullableStringFieldUpdateOperationsInput | string | null
     available?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    offers_iap?: NullableStringFieldUpdateOperationsInput | string | null
+    offers_iap?: NullableBoolFieldUpdateOperationsInput | boolean | null
     iap_range?: NullableStringFieldUpdateOperationsInput | string | null
     android_version?: NullableStringFieldUpdateOperationsInput | string | null
     android_max_version?: NullableStringFieldUpdateOperationsInput | string | null
@@ -29452,7 +29452,7 @@ export namespace Prisma {
     free?: boolean | null
     currency?: string | null
     available?: boolean | null
-    offers_iap?: string | null
+    offers_iap?: boolean | null
     iap_range?: string | null
     android_version?: string | null
     android_max_version?: string | null
@@ -29509,7 +29509,7 @@ export namespace Prisma {
     free?: boolean | null
     currency?: string | null
     available?: boolean | null
-    offers_iap?: string | null
+    offers_iap?: boolean | null
     iap_range?: string | null
     android_version?: string | null
     android_max_version?: string | null
@@ -29579,7 +29579,7 @@ export namespace Prisma {
     free?: NullableBoolFieldUpdateOperationsInput | boolean | null
     currency?: NullableStringFieldUpdateOperationsInput | string | null
     available?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    offers_iap?: NullableStringFieldUpdateOperationsInput | string | null
+    offers_iap?: NullableBoolFieldUpdateOperationsInput | boolean | null
     iap_range?: NullableStringFieldUpdateOperationsInput | string | null
     android_version?: NullableStringFieldUpdateOperationsInput | string | null
     android_max_version?: NullableStringFieldUpdateOperationsInput | string | null
@@ -29636,7 +29636,7 @@ export namespace Prisma {
     free?: NullableBoolFieldUpdateOperationsInput | boolean | null
     currency?: NullableStringFieldUpdateOperationsInput | string | null
     available?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    offers_iap?: NullableStringFieldUpdateOperationsInput | string | null
+    offers_iap?: NullableBoolFieldUpdateOperationsInput | boolean | null
     iap_range?: NullableStringFieldUpdateOperationsInput | string | null
     android_version?: NullableStringFieldUpdateOperationsInput | string | null
     android_max_version?: NullableStringFieldUpdateOperationsInput | string | null
@@ -29690,7 +29690,7 @@ export namespace Prisma {
     free?: boolean | null
     currency?: string | null
     available?: boolean | null
-    offers_iap?: string | null
+    offers_iap?: boolean | null
     iap_range?: string | null
     android_version?: string | null
     android_max_version?: string | null
@@ -29747,7 +29747,7 @@ export namespace Prisma {
     free?: boolean | null
     currency?: string | null
     available?: boolean | null
-    offers_iap?: string | null
+    offers_iap?: boolean | null
     iap_range?: string | null
     android_version?: string | null
     android_max_version?: string | null
@@ -29817,7 +29817,7 @@ export namespace Prisma {
     free?: NullableBoolFieldUpdateOperationsInput | boolean | null
     currency?: NullableStringFieldUpdateOperationsInput | string | null
     available?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    offers_iap?: NullableStringFieldUpdateOperationsInput | string | null
+    offers_iap?: NullableBoolFieldUpdateOperationsInput | boolean | null
     iap_range?: NullableStringFieldUpdateOperationsInput | string | null
     android_version?: NullableStringFieldUpdateOperationsInput | string | null
     android_max_version?: NullableStringFieldUpdateOperationsInput | string | null
@@ -29874,7 +29874,7 @@ export namespace Prisma {
     free?: NullableBoolFieldUpdateOperationsInput | boolean | null
     currency?: NullableStringFieldUpdateOperationsInput | string | null
     available?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    offers_iap?: NullableStringFieldUpdateOperationsInput | string | null
+    offers_iap?: NullableBoolFieldUpdateOperationsInput | boolean | null
     iap_range?: NullableStringFieldUpdateOperationsInput | string | null
     android_version?: NullableStringFieldUpdateOperationsInput | string | null
     android_max_version?: NullableStringFieldUpdateOperationsInput | string | null
@@ -29928,7 +29928,7 @@ export namespace Prisma {
     free?: boolean | null
     currency?: string | null
     available?: boolean | null
-    offers_iap?: string | null
+    offers_iap?: boolean | null
     iap_range?: string | null
     android_version?: string | null
     android_max_version?: string | null
@@ -29985,7 +29985,7 @@ export namespace Prisma {
     free?: boolean | null
     currency?: string | null
     available?: boolean | null
-    offers_iap?: string | null
+    offers_iap?: boolean | null
     iap_range?: string | null
     android_version?: string | null
     android_max_version?: string | null
@@ -30055,7 +30055,7 @@ export namespace Prisma {
     free?: NullableBoolFieldUpdateOperationsInput | boolean | null
     currency?: NullableStringFieldUpdateOperationsInput | string | null
     available?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    offers_iap?: NullableStringFieldUpdateOperationsInput | string | null
+    offers_iap?: NullableBoolFieldUpdateOperationsInput | boolean | null
     iap_range?: NullableStringFieldUpdateOperationsInput | string | null
     android_version?: NullableStringFieldUpdateOperationsInput | string | null
     android_max_version?: NullableStringFieldUpdateOperationsInput | string | null
@@ -30112,7 +30112,7 @@ export namespace Prisma {
     free?: NullableBoolFieldUpdateOperationsInput | boolean | null
     currency?: NullableStringFieldUpdateOperationsInput | string | null
     available?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    offers_iap?: NullableStringFieldUpdateOperationsInput | string | null
+    offers_iap?: NullableBoolFieldUpdateOperationsInput | boolean | null
     iap_range?: NullableStringFieldUpdateOperationsInput | string | null
     android_version?: NullableStringFieldUpdateOperationsInput | string | null
     android_max_version?: NullableStringFieldUpdateOperationsInput | string | null
@@ -30472,7 +30472,7 @@ export namespace Prisma {
     free?: boolean | null
     currency?: string | null
     available?: boolean | null
-    offers_iap?: string | null
+    offers_iap?: boolean | null
     iap_range?: string | null
     android_version?: string | null
     android_max_version?: string | null
@@ -30516,7 +30516,7 @@ export namespace Prisma {
     free?: NullableBoolFieldUpdateOperationsInput | boolean | null
     currency?: NullableStringFieldUpdateOperationsInput | string | null
     available?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    offers_iap?: NullableStringFieldUpdateOperationsInput | string | null
+    offers_iap?: NullableBoolFieldUpdateOperationsInput | boolean | null
     iap_range?: NullableStringFieldUpdateOperationsInput | string | null
     android_version?: NullableStringFieldUpdateOperationsInput | string | null
     android_max_version?: NullableStringFieldUpdateOperationsInput | string | null
@@ -30572,7 +30572,7 @@ export namespace Prisma {
     free?: NullableBoolFieldUpdateOperationsInput | boolean | null
     currency?: NullableStringFieldUpdateOperationsInput | string | null
     available?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    offers_iap?: NullableStringFieldUpdateOperationsInput | string | null
+    offers_iap?: NullableBoolFieldUpdateOperationsInput | boolean | null
     iap_range?: NullableStringFieldUpdateOperationsInput | string | null
     android_version?: NullableStringFieldUpdateOperationsInput | string | null
     android_max_version?: NullableStringFieldUpdateOperationsInput | string | null
@@ -30628,7 +30628,7 @@ export namespace Prisma {
     free?: NullableBoolFieldUpdateOperationsInput | boolean | null
     currency?: NullableStringFieldUpdateOperationsInput | string | null
     available?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    offers_iap?: NullableStringFieldUpdateOperationsInput | string | null
+    offers_iap?: NullableBoolFieldUpdateOperationsInput | boolean | null
     iap_range?: NullableStringFieldUpdateOperationsInput | string | null
     android_version?: NullableStringFieldUpdateOperationsInput | string | null
     android_max_version?: NullableStringFieldUpdateOperationsInput | string | null

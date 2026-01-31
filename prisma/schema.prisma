@@ -42,7 +42,7 @@ model apps {
     free                       Boolean?
     currency                   String?
     available                  Boolean?
-    offers_iap                 String?
+    offers_iap                 Boolean?
     iap_range                  String?
     android_version            String?
     android_max_version        String?

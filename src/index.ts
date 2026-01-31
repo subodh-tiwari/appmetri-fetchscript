@@ -1,14 +1,12 @@
-import AWS from "aws-sdk";
 import {
-    getAllAppIds,
     getNAAppByAppId,
     getAppByAppId,
     getOldInstalls,
     insertMultipleRows,
-    poolGPS,
     getDeveloperByDeveloperId,
-    getAppIdsPrisma,
     getAppIds,
+    upsertDeveloper,
+    insertSingleRow,
 } from "./query.js";
 import {
     getAppData,
@@ -33,282 +31,240 @@ import {
     shuffleArray,
     getSearchAppsData,
 } from "./utils.js";
-import type { PoolClient } from "pg";
+import { prisma } from "./lib/prisma.js";
+import type { apps } from "./generated/prisma/index.js";
 
-AWS.config.update({
-    region: "na",
-    accessKeyId: "na",
-    secretAccessKey: "na",
-});
+const storeApps = async (searchTerm: string) => {
+    const searchAppsData = await getSearchAppsData(searchTerm);
+    // loop over each appId from searchAppsData for given searchTerm
+    for (const searchApp of searchAppsData) {
+        // transaction begin
+        await prisma.$executeRawUnsafe("BEGIN");
+        try {
+            const app = await getAppByAppId(prisma, searchApp.appId);
+            const naApp = await getNAAppByAppId(prisma, searchApp.appId);
+            if (app.app_id && naApp.app_id) {
+                continue;
+            }
 
-const sqs = new AWS.SQS({ apiVersion: "2012-11-05" });
+            // fetch primary app data
+            const primaryAppData = await getAppData(searchApp.appId);
 
-const SQS_URL = "https://sqs.us-west-2.amazonaws.com/061039791083/apps";
-
-const storeApps = async (
-    clientGPS: PoolClient,
-    result: AWS.SQS.Message[],
-    no: string,
-) => {
-    for (const val of result) {
-        const searchAppsData = await getSearchAppsData(val.Body as string);
-        for (const searchApp of searchAppsData) {
-            try {
-                const deleteParams = {
-                    QueueUrl: SQS_URL,
-                    ReceiptHandle: val.ReceiptHandle,
-                } as any;
-                console.log(`no: ${no}, Processing ${searchApp}`);
-                const app = await getAppByAppId(clientGPS, searchApp.appId);
-                const naApp = await getNAAppByAppId(clientGPS, searchApp.appId);
-                if (app && naApp) {
-                    await sqs.deleteMessage(deleteParams).promise();
-                    console.log(
-                        `no: ${no}, Duplicate: Message with ReceiptHandle ${searchApp} deleted. `,
-                    );
-                    continue;
-                }
-
-                await clientGPS.query("BEGIN");
-
-                const primaryAppData = await getAppData(searchApp.appId);
-
-                if (Object.keys(primaryAppData).length === 0) {
-                    const naAppsMapping = await getNAAppsMapping(
-                        searchApp.appId,
-                    );
-                    const { keys: naAppsKeys, values: naAppsValues } =
-                        await getKeysAndValues(naAppsMapping);
-                    await insertMultipleRows(clientGPS, "na_apps", naAppsKeys, [
-                        naAppsValues,
-                    ]);
-                    await clientGPS.query("COMMIT");
-                    await delay(300);
-                    await sqs.deleteMessage(deleteParams).promise();
-                    console.log(
-                        `no: ${no},  NoData: Message with ReceiptHandle ${searchApp} deleted.`,
-                    );
-                    continue;
-                }
-
-                let allApps = [];
-                allApps.push(primaryAppData);
-
-                // developer
-                const developerMappingData =
-                    await getDeveloperMapping(primaryAppData);
-                const { keys: developerKeys, values: developerValues } =
-                    await getKeysAndValues(developerMappingData);
-
-                let developer = await getDeveloperByDeveloperId(
-                    clientGPS,
-                    developerMappingData.developer_id as string,
+            // if no data found for the app, insert into na_apps and continue
+            if (Object.keys(primaryAppData).length === 0) {
+                const naAppsMapping = await getNAAppsMapping(searchApp.appId);
+                const { keys: naAppsKeys, values: naAppsValues } =
+                    await getKeysAndValues(naAppsMapping);
+                await insertSingleRow(
+                    prisma,
+                    "na_apps",
+                    naAppsKeys,
+                    naAppsValues,
                 );
-                // console.log(
-                //   `no: ${no}, developer: ${developerMappingData.developer_id}`,
-                //   developer
-                // );
-                if (developer.length === 0) {
-                    developer = await insertMultipleRows(
-                        clientGPS,
-                        "developers",
-                        developerKeys,
-                        [developerValues],
-                    );
+                continue;
+            }
 
-                    // fetch all apps under the developer
+            // start adding all the apps data into array so that in the last we can bulk insert into the apps table
+            let allApps: any[] = [];
 
-                    const developerAppsData = await getDeveloperAppsData(
-                        primaryAppData.developer as string,
+            // add primary app data first
+            allApps.push(primaryAppData);
+
+            /**
+             * fetch developer related data from the primary app
+             * and insert into developers table if not exists
+             */
+
+            // map developer data
+            const developerMappingData =
+                await getDeveloperMapping(primaryAppData);
+            const { keys: developerKeys, values: developerValues } =
+                await getKeysAndValues(developerMappingData);
+
+            // upsert developer data into developers table
+            const developer = await upsertDeveloper(
+                prisma,
+                developerMappingData,
+            );
+
+            // fetch all apps under the developer
+            const developerAppsData = await getDeveloperAppsData(
+                primaryAppData.developer as string,
+            );
+            allApps = allApps.concat(developerAppsData);
+
+            // // fetch all similar apps data for all the apps under the developer
+            // for (const dev of developerAppsData) {
+            //     const similarAppData = await getSimilarAppsData(dev.appId);
+            //     allApps = allApps.concat(similarAppData);
+            // }
+
+            // find all the unique apps from allApps array
+            const uniqueApps = await getUniqueApps(allApps);
+
+            // check which appIds are already present in the apps table
+            const uniqueAppIds = uniqueApps.map((app) => app.appId as string);
+            const existingAppIds = await getAppIds(prisma, uniqueAppIds);
+
+            // filter out the new apps data which are not present in the apps table
+            const newApps = uniqueApps.filter(
+                (uniqueApp) =>
+                    !existingAppIds.includes(
+                        uniqueApp.appId ? uniqueApp.appId : "",
+                    ),
+            );
+
+            /**
+             * fetch existing app related data from various tables and
+             * update the existing apps data in the ratings table
+             */
+
+            const newAppsDataToInsert: apps[] = [];
+            // loop over each new app and insert into apps and related tables
+            for (const newApp of newApps) {
+                // fetch phone number of the app's developer
+                const phoneNumber = newApp.appId
+                    ? await getPlayStorePhoneNumber(
+                          `https://play.google.com/store/apps/details?id=${newApp.appId}`,
+                      )
+                    : "";
+
+                // insert into apps table
+                // Note :- for the below mapping, we are using the same developer ID.
+                const newAppsMappingData = await getAppsMapping(
+                    newApp,
+                    developer.id,
+                    phoneNumber,
+                );
+                newAppsDataToInsert.push(newAppsMappingData);
+
+                // TODO: bulk insert all new apps at once after collecting all mappings
+                const { keys: newAppKeys, values: newAppValues } =
+                    await getKeysAndValues(newAppsMappingData);
+                const storedNewApp = await insertSingleRow<apps>(
+                    prisma,
+                    "apps",
+                    newAppKeys,
+                    [newAppValues],
+                );
+
+                // ads_txt
+                if (newApp.developerWebsite !== undefined) {
+                    const adNetworks = await fetchAndParseAppAdsTxt(
+                        `${removeTrailingSlash(newApp.developerWebsite)}/app-ads.txt`,
                     );
-                    allApps = allApps.concat(developerAppsData);
+                    const adsTxtMappingData = await getAdsTxtMapping(
+                        storedNewApp.id,
+                        adNetworks,
+                    );
+                    const { keys: adsTxtKeys, values: adsTxtValues } =
+                        await getKeysAndValues(adsTxtMappingData);
+                    if (adNetworks.length > 0) {
+                        await insertSingleRow(
+                            prisma,
+                            "ads_txt",
+                            adsTxtKeys,
+                            adsTxtValues,
+                        );
+                    }
                 }
 
-                // // fetch all similar apps data for all the apps under the developer
-                // for (const dev of developerData) {
-                //   const similarAppData = await getSimilarAppsData(dev.appId);
-                //   allApps = allApps.concat(similarAppData);
+                // installs
+                if (newApp.maxInstalls !== undefined) {
+                    const oldInstalls = await getOldInstalls(
+                        prisma,
+                        storedNewApp.id,
+                    );
+                    const installsMappingData = await getAppInstallsMapping(
+                        storedNewApp.id,
+                        newApp,
+                        oldInstalls,
+                    );
+                    const { keys: installsKeys, values: installsValues } =
+                        await getKeysAndValues(installsMappingData);
+                    await insertMultipleRows(prisma, "installs", installsKeys, [
+                        installsValues,
+                    ]);
+                }
+
+                // permissions
+                const appPermissionsData = await getAppPermissionsData(
+                    newApp.appId as string,
+                );
+                if (Object.keys(appPermissionsData).length === 0) {
+                    const appPermissionsMappingData =
+                        await getAppPermissionsMapping(
+                            storedNewApp.id,
+                            appPermissionsData,
+                        );
+                    const {
+                        keys: appPermissionsKeys,
+                        values: appPermissionsValues,
+                    } = await getKeysAndValues(appPermissionsMappingData);
+                    await insertSingleRow(
+                        prisma,
+                        "permissions",
+                        appPermissionsKeys,
+                        [appPermissionsValues],
+                    );
+                }
+
+                // ratings
+                if (
+                    newApp.score !== undefined ||
+                    newApp.ratings !== undefined
+                ) {
+                    const appRatingsMappingData = await getAppRatingsMapping(
+                        storedNewApp.id,
+                        newApp,
+                    );
+                    const { keys: appRatingsKeys, values: appRatingsValues } =
+                        await getKeysAndValues(appRatingsMappingData);
+                    await insertSingleRow(
+                        prisma,
+                        "ratings",
+                        appRatingsKeys,
+                        appRatingsValues,
+                    );
+                }
+
+                // // reviews
+                // const appReviewsData = await getAppReviewsData(newApp.appId);
+                // if (Object.keys(appReviewsData).length === 0) {
+                //   for (const appReview of appReviewsData) {
+                //     const appReviewsMappingData = await getAppReviewsMapping(storedNewApp[0].id, appReview);
+                //     const { keys: appReviewsKeys, values: appReviewsValues } = await getKeysAndValues(appReviewsMappingData);
+                //     await insertMultipleRows(clientGPS, 'reviews', appReviewsKeys, [appReviewsValues]);
+                //   }
                 // }
 
-                const uniqueApps = await getUniqueApps(allApps);
-                const uniqueAppIds = uniqueApps.map(
-                    (app) => app.appId as string,
-                );
-                const existingAppIds = await getAppIds(clientGPS, uniqueAppIds);
-                const newAppIds = uniqueApps.filter(
-                    (uniqueApp) => !existingAppIds.includes(uniqueApp.appId),
-                );
-
-                for (const app of newAppIds) {
-                    //console.log(`${app.appId}`);
-                    // fetch phone number of the app's developer
-                    const phoneNumber = app.appId
-                        ? await getPlayStorePhoneNumber(
-                              `https://play.google.com/store/apps/details?id=${app.appId}`,
-                          )
-                        : "";
-
-                    // apps
-                    // Note :- for the below mapping, we are using the same developer ID.
-                    const appsMappingData = await getAppsMapping(
-                        app,
-                        developer[0].id,
-                        phoneNumber,
+                // changelogs
+                if (newApp.recentChanges !== undefined) {
+                    const appChangelogsMappingData = await getChangelogsMapping(
+                        storedNewApp.id,
+                        newApp,
                     );
-                    const { keys: appKeys, values: appValues } =
-                        await getKeysAndValues(appsMappingData);
-                    const storedApp = await insertMultipleRows(
-                        clientGPS,
-                        "apps",
-                        appKeys,
-                        [appValues],
+                    const {
+                        keys: newAppChangelogsKeys,
+                        values: newAppChangelogsValues,
+                    } = await getKeysAndValues(appChangelogsMappingData);
+                    await insertSingleRow(
+                        prisma,
+                        "changelogs",
+                        newAppChangelogsKeys,
+                        newAppChangelogsValues,
                     );
-
-                    // // ads_txt
-                    // if (app.developerWebsite !== undefined) {
-                    //   const adNetworks = await fetchAndParseAppAdsTxt(`${removeTrailingSlash(app.developerWebsite)}/app-ads.txt`);
-                    //   const adsTxtMappingData = await getAdsTxtMapping(storedApp[0].id, adNetworks);
-                    //   const { keys: adsTxtKeys, values: adsTxtValues } = await getKeysAndValues(adsTxtMappingData);
-                    //   if (adNetworks.length > 0) {
-                    //     await insertMultipleRows(clientGPS, 'ads_txt', adsTxtKeys, [adsTxtValues]);
-                    //   }
-                    // }
-
-                    // installs
-                    if (app.maxInstalls !== undefined) {
-                        const oldInstalls = await getOldInstalls(
-                            clientGPS,
-                            storedApp[0].id,
-                        );
-                        const installsMappingData = await getAppInstallsMapping(
-                            storedApp[0].id,
-                            app,
-                            oldInstalls,
-                        );
-                        const { keys: installsKeys, values: installsValues } =
-                            await getKeysAndValues(installsMappingData);
-                        await insertMultipleRows(
-                            clientGPS,
-                            "installs",
-                            installsKeys,
-                            [installsValues],
-                        );
-                    }
-
-                    // // permissions
-                    // const appPermissionsData = await getAppPermissionsData(app.appId);
-                    // if (Object.keys(appPermissionsData).length === 0) {
-                    //   const appPermissionsMappingData = await getAppPermissionsMapping(storedApp[0].id, appPermissionsData);
-                    //   const { keys: appPermissionsKeys, values: appPermissionsValues } = await getKeysAndValues(appPermissionsMappingData);
-                    //   await insertMultipleRows(clientGPS, 'permissions', appPermissionsKeys, [appPermissionsValues]);
-                    // }
-
-                    // ratings
-                    if (app.score !== undefined || app.ratings !== undefined) {
-                        const appRatingsMappingData =
-                            await getAppRatingsMapping(storedApp[0].id, app);
-                        const {
-                            keys: appRatingsKeys,
-                            values: appRatingsValues,
-                        } = await getKeysAndValues(appRatingsMappingData);
-                        await insertMultipleRows(
-                            clientGPS,
-                            "ratings",
-                            appRatingsKeys,
-                            [appRatingsValues],
-                        );
-                    }
-
-                    // // reviews
-                    // const appReviewsData = await getAppReviewsData(app.appId);
-                    // if (Object.keys(appReviewsData).length === 0) {
-                    //   for (const appReview of appReviewsData) {
-                    //     const appReviewsMappingData = await getAppReviewsMapping(storedApp[0].id, appReview);
-                    //     const { keys: appReviewsKeys, values: appReviewsValues } = await getKeysAndValues(appReviewsMappingData);
-                    //     await insertMultipleRows(clientGPS, 'reviews', appReviewsKeys, [appReviewsValues]);
-                    //   }
-                    // }
-
-                    // changelogs
-                    if (app.recentChanges !== undefined) {
-                        const appChangelogsMappingData =
-                            await getChangelogsMapping(storedApp[0].id, app);
-                        const {
-                            keys: appChangelogsKeys,
-                            values: appChangelogsValues,
-                        } = await getKeysAndValues(appChangelogsMappingData);
-                        await insertMultipleRows(
-                            clientGPS,
-                            "changelogs",
-                            appChangelogsKeys,
-                            [appChangelogsValues],
-                        );
-                    }
                 }
-                await clientGPS.query("COMMIT");
-                await sqs.deleteMessage(deleteParams).promise();
-                console.log(
-                    `no: ${no},  Processed: Message with ReceiptHandle ${searchApp} deleted.`,
-                );
-            } catch (error: Error | any) {
-                await clientGPS.query("ROLLBACK");
-                console.error(
-                    `no: ${no}, Transaction failed and rolled backed for ${searchApp} => `,
-                    error.stack,
-                );
             }
+            await prisma.$executeRawUnsafe("COMMIT");
+        } catch (error: Error | any) {
+            await prisma.$executeRawUnsafe("ROLLBACK");
+            console.error(
+                `Transaction failed and rolled backed for ${searchApp} => `,
+                error.stack,
+            );
         }
     }
 };
 
-const consumeSqsMessages = async (
-    clientGPS: PoolClient,
-    clientGPS1: PoolClient,
-    clientGPS2: PoolClient,
-    no: number,
-) => {
-    const params = {
-        QueueUrl: SQS_URL,
-        MaxNumberOfMessages: 10, // Adjust based on the number of messages you want to consume at a time
-        WaitTimeSeconds: 20, // Long polling
-    };
-
-    try {
-        const data = await sqs.receiveMessage(params).promise();
-        console.log(`no => ${no}--------------------------------------`);
-        if (data.Messages) {
-            const [first, second, third] = [
-                data.Messages.slice(0, 3),
-                data.Messages.slice(3, 6),
-                data.Messages.slice(6),
-            ];
-            await Promise.all([
-                storeApps(clientGPS, first, `${no}1`),
-                storeApps(clientGPS1, second, `${no}2`),
-                storeApps(clientGPS2, third, `${no}3`),
-            ]);
-        } else {
-            console.log("No messages to process.");
-        }
-    } catch (error) {
-        console.error("Error receiving or deleting SQS message:", error);
-    }
-
-    await consumeSqsMessages(clientGPS, clientGPS1, clientGPS2, no);
-};
-
-const startConsumer = async (no: number) => {
-    console.log("Starting SQS consumer...");
-
-    const clientGPS = await poolGPS.connect();
-    const clientGPS1 = await poolGPS.connect();
-    const clientGPS2 = await poolGPS.connect();
-    await consumeSqsMessages(clientGPS, clientGPS1, clientGPS2, no);
-    // Poll SQS every 5 seconds (adjust the interval as necessary)
-    //setInterval(consumeSqsMessages(clientGPS), 12000);
-};
-
-startConsumer(1);
-startConsumer(2);
-startConsumer(3);
-startConsumer(4);
+storeApps("Wallpaper");

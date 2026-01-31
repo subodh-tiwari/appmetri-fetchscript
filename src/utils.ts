@@ -5,6 +5,18 @@ import gplay from "google-play-scraper";
 import type { IFnPermissionsOptions } from "google-play-scraper";
 import { TOTAL_LIMIT_REVIEWS } from "./constants.js";
 import type { Model } from "typings";
+import {
+    Prisma,
+    type ads_txt,
+    type apps,
+    type changelogs,
+    type developers,
+    type installs,
+    type na_apps,
+    type permissions,
+    type ratings,
+    type reviews,
+} from "./generated/prisma/index.js";
 
 const countryList = [
     "AO",
@@ -75,15 +87,22 @@ const countryList = [
     "AE",
 ];
 
-export const getAppData = async (appId: string): Promise<Model.AppsData> => {
-    return gplay
-        .app({ appId, lang: "en", country: "in" })
-        .then((data) => {
-            return data as Model.AppsData;
-        })
-        .catch(() => {
-            return {} as Model.AppsData;
-        });
+export const getAppData = async (
+    appId: string,
+    lang?: string,
+    // country?: string,
+): Promise<Model.AppsData> => {
+    return (
+        gplay
+            .app({ appId, lang: lang ?? "en" })
+            // .app({ appId, lang: lang ?? "en", country: country ?? "in" })
+            .then((data) => {
+                return data as Model.AppsData;
+            })
+            .catch(() => {
+                return {} as Model.AppsData;
+            })
+    );
 };
 
 export const getDeveloperAppsData = async (devId: string) => {
@@ -238,6 +257,7 @@ const isArrayOfUndefined = (arr: any[]) => {
     return Array.isArray(arr) && arr.every((val) => val === undefined);
 };
 
+// map object to keys and values arrays for bulk insertion
 export const getKeysAndValues = async (
     obj: Record<string, any>,
 ): Promise<{ keys: string[]; values: any[] }> => {
@@ -299,129 +319,159 @@ export const getDeveloperMapping = async (data: Model.AppsData) => {
 
 export const getAppsMapping = async (
     data: Model.AppsData,
-    developerId: string,
+    developerId: number,
     phoneNumber: string,
-) => {
+): Promise<apps> => {
     return {
-        app_id: data.appId,
+        id: 0, // will be auto-generated
+        app_id: data.appId ? data.appId : "",
         developer_id: developerId,
-        name: data.title,
-        url: data.url,
+        name: data.title ? data.title : "",
+        url: data.url ? data.url : "",
         phone_number: phoneNumber,
-        email: data.developerEmail,
-        address: data.developerLegalAddress,
-        website: data.developerWebsite,
-        description: data.description,
-        summary: data.summary,
-        total_ratings: data.ratings,
-        min_installs: data.minInstalls,
-        max_installs: data.maxInstalls,
-        price: data.price,
-        free: data.free,
-        currency: data.currency,
+        email: data.developerEmail ? data.developerEmail : "",
+        address: data.developerLegalAddress ? data.developerLegalAddress : "",
+        website: data.developerWebsite ? data.developerWebsite : "",
+        description: data.description ? data.description : "",
+        summary: data.summary ? data.summary : "",
+        total_ratings: data.ratings ? data.ratings : null,
+        min_installs: data.minInstalls ? BigInt(data.minInstalls) : null,
+        max_installs: data.maxInstalls ? BigInt(data.maxInstalls) : null,
+        price: data.price ? new Prisma.Decimal(data.price) : null,
+        free: data.free ? data.free : false,
+        currency: data.currency ? data.currency : "",
         available: data.released ? true : false,
-        offers_iap: data.offersIAP,
-        iap_range: data.IAPRange,
-        android_version: data.androidVersion,
-        android_max_version: data.androidMaxVersion,
-        privacy_policy: data.privacyPolicy,
-        category: data.genreId,
-        icon: data.icon,
-        header_image: data.headerImage,
-        screenshots: data.screenshots,
-        video: data.video,
-        video_image: data.videoImage,
-        preview_video: data.previewVideo,
-        content_rating: data.contentRating,
-        content_rating_description: data.contentRatingDescription,
-        ad_supported: data.adSupported,
-        released: data.released ? dateFormat(data.released, "yyyy-mm-dd") : "",
-        last_updated_at: data.updated ? new Date(data.updated) : "",
-        version: data.version,
-        recent_changes: data.recentChanges,
-        comments: data.comments,
-        preregister: data.preregister,
-        is_available_in_play_store: data.isAvailableInPlayPass,
-        early_access_enabled: data.earlyAccessEnabled,
+        offers_iap: data.offersIAP ? data.offersIAP : false,
+        iap_range: data.IAPRange ? data.IAPRange : "",
+        android_version: data.androidVersion ? data.androidVersion : "",
+        android_max_version: data.androidMaxVersion
+            ? data.androidMaxVersion
+            : "",
+        privacy_policy: data.privacyPolicy ? data.privacyPolicy : "",
+        category: data.genreId ? data.genreId : "",
+        icon: data.icon ? data.icon : "",
+        header_image: data.headerImage ? data.headerImage : "",
+        screenshots: data.screenshots ? data.screenshots.join(",") : "",
+        video: data.video ? data.video : "",
+        video_image: data.videoImage ? data.videoImage : "",
+        preview_video: data.previewVideo ? data.previewVideo : "",
+        content_rating: data.contentRating ? data.contentRating : "",
+        content_rating_description: data.contentRatingDescription
+            ? data.contentRatingDescription
+            : "",
+        ad_supported: data.adSupported ? data.adSupported : false,
+        released: data.released
+            ? dateFormat(data.released, "yyyy-mm-dd")
+            : "1970-01-01",
+        last_updated_at: data.updated
+            ? new Date(data.updated)
+            : new Date("1970-01-01"),
+        version: data.version ? data.version : "",
+        recent_changes: data.recentChanges ? data.recentChanges : "",
+        comments: data.comments ? data.comments : [],
+        preregister: data.preregister ? data.preregister : false,
+        is_available_in_play_store: data.isAvailableInPlayPass
+            ? data.isAvailableInPlayPass
+            : false,
+        early_access_enabled: data.earlyAccessEnabled
+            ? data.earlyAccessEnabled
+            : false,
+        created_at: new Date(),
+        updated_at: new Date(),
     };
 };
 
 export const getChangelogsMapping = async (
-    appId: string,
+    appId: number,
     data: Model.AppsData,
-) => {
+): Promise<changelogs> => {
     return {
+        id: 0, // will be auto-generated
         app_id: appId,
-        changelog: data.recentChanges,
+        changelog: data.recentChanges ? data.recentChanges : "",
         changes_on: data.updated
             ? new Date(data.updated)
-            : "1970-01-01T00:00:00Z",
+            : new Date("1970-01-01T00:00:00Z"),
+        created_at: new Date(),
     };
 };
 
 export const getAdsTxtMapping = async (
-    appId: string,
+    appId: number,
     adNetworks: Model.AppAdsTxtRecord[],
-) => {
+): Promise<ads_txt> => {
     return {
+        id: 0, // will be auto-generated
         app_id: appId,
         ad_networks: JSON.stringify(adNetworks),
+        created_at: new Date(),
     };
 };
 
 export const getAppInstallsMapping = async (
-    appId: string,
+    appId: number,
     data: Model.AppsData,
-    oldInstalls: number,
-) => {
+    oldInstalls: bigint,
+): Promise<installs> => {
     return {
+        id: 0, // will be auto-generated
         app_id: appId,
-        change: data.maxInstalls ? +data.maxInstalls - +oldInstalls : 0,
-        current_installs: data.maxInstalls,
+        change: data.maxInstalls
+            ? BigInt(data.maxInstalls) - BigInt(oldInstalls)
+            : 0n,
+        current_installs: data.maxInstalls ? BigInt(data.maxInstalls) : 0n,
+        created_at: new Date(),
     };
 };
 
 export const getAppPermissionsMapping = async (
-    appId: string,
+    appId: number,
     permissionsData: Model.AppPermissionsData[],
-) => {
+): Promise<permissions> => {
     return {
+        id: 0, // will be auto-generated
         app_id: appId,
         permissions: JSON.stringify(permissionsData),
+        created_at: new Date(),
     };
 };
 
 export const getAppRatingsMapping = async (
-    appId: string,
+    appId: number,
     data: Model.AppsData,
-) => {
+): Promise<ratings> => {
     return {
+        id: 0, // will be auto-generated
         app_id: appId,
-        score: data.score,
-        total_count: data.ratings,
-        rating_1: data.histogram ? data.histogram["1"] : 0,
-        rating_2: data.histogram ? data.histogram["2"] : 0,
-        rating_3: data.histogram ? data.histogram["3"] : 0,
-        rating_4: data.histogram ? data.histogram["4"] : 0,
-        rating_5: data.histogram ? data.histogram["5"] : 0,
+        score: data.score ? new Prisma.Decimal(data.score) : null,
+        total_count: data.ratings ? BigInt(data.ratings) : 0n,
+        rating_1: data.histogram?.[1] ? BigInt(data.histogram["1"]) : 0n,
+        rating_2: data.histogram?.[2] ? BigInt(data.histogram["2"]) : 0n,
+        rating_3: data.histogram?.[3] ? BigInt(data.histogram["3"]) : 0n,
+        rating_4: data.histogram?.[4] ? BigInt(data.histogram["4"]) : 0n,
+        rating_5: data.histogram?.[5] ? BigInt(data.histogram["5"]) : 0n,
+        created_at: new Date(),
     };
 };
 
 export const getAppReviewsMapping = async (
-    appId: string,
+    appId: number,
     reviewData: Model.ReviewData,
-) => {
+): Promise<reviews> => {
     return {
+        id: 0, // will be auto-generated
         app_id: appId,
         review: reviewData.text,
-        reviewed_on: reviewData.date,
-        // sentiment: '',
+        reviewed_on: new Date(reviewData.date),
+        sentiment: "",
         review_info: JSON.stringify(reviewData),
+        created_at: new Date(),
     };
 };
 
-export const getNAAppsMapping = async (appId: string) => {
+export const getNAAppsMapping = async (appId: string): Promise<na_apps> => {
     return {
+        id: 0, // will be auto-generated
         app_id: appId,
     };
 };

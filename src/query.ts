@@ -1,54 +1,17 @@
-import pkg, { type PoolClient } from "pg";
-import { prisma } from "./lib/prisma.js";
+import type { PrismaClient } from "@prisma/client/extension";
+import type { apps, developers, na_apps } from "./generated/prisma/index.js";
 import { isStringifiedJson } from "./utils.js";
-const { Pool } = pkg;
 
-export const poolGPS = new Pool({
-    user: "admin",
-    password: "Tiwari@71",
-    host: "35.225.64.69",
-    port: 5432,
-    database: "google_play_store",
-});
-
-export const poolAppMetri = new Pool({
-    user: "admin",
-    password: "Tiwari@71",
-    host: "35.225.64.69",
-    port: 5432,
-    database: "appmetri",
-});
-
-export const getUserData = async () => {
-    const userData = await prisma.users.findMany();
-    console.log("userData", userData);
-};
-
-export const getAllAppIds = async (limit: number, offset: number) => {
-    const clientAppMetri = await poolAppMetri.connect();
-    try {
-        const result = await clientAppMetri.query(
-            "SELECT app_id FROM app_ids ORDER BY id DESC LIMIT $1 OFFSET $2",
-            [limit, offset],
-        );
-        return result.rows;
-    } catch (err) {
-        return [{}];
-    } finally {
-        clientAppMetri.release();
-    }
-};
-
-export const insertMultipleRows = async (
-    clientGPS: PoolClient,
+export const insertMultipleRows = async <T>(
+    tx: PrismaClient,
     tableName: string,
     columns: string[],
     rows: any[][],
-) => {
+): Promise<T[]> => {
     if (tableName === "developers") {
-        await clientGPS.query("SAVEPOINT developers_insert");
+        await tx.$executeRawUnsafe("SAVEPOINT developers_insert");
     } else if (tableName === "apps") {
-        await clientGPS.query("SAVEPOINT apps_insert");
+        await tx.$executeRawUnsafe("SAVEPOINT apps_insert");
     }
     try {
         const values: any[] = [];
@@ -71,125 +34,205 @@ export const insertMultipleRows = async (
         RETURNING *;
       `;
 
-        const result = await clientGPS.query(query, values);
-        return result.rows;
+        console.log("Query:", query);
+        console.log("values:", values);
+        console.log("rows:", rows);
+
+        const result = await tx.$executeRawUnsafe(query, ...values);
+        console.log(result);
+        return result as T[];
     } catch (err: any) {
-        // console.log(
-        //     `insertMultipleRows ${tableName} => `,
-        //     err.message.split("\n")[0],
-        // );
-        // if (tableName === "developers") {
-        //     await clientGPS.query("ROLLBACK TO developers_insert");
-        //     const developerIdData = await getDeveloperId(clientGPS, rows[0][0]);
-        //     return developerIdData;
-        // } else if (tableName === "apps") {
-        //     await clientGPS.query("ROLLBACK TO apps_insert");
-        //     const appIdData = await getAppId(clientGPS, rows[0][0]);
-        //     return appIdData;
-        // }
-        return [];
+        console.log(`insertMultipleRows ${tableName} => `, err);
+        await tx.$executeRawUnsafe("ROLLBACK");
+        if (tableName === "developers") {
+            await tx.$executeRawUnsafe("ROLLBACK TO developers_insert");
+            // const developerIdData = await getDeveloperId(tx, rows[0][0]);
+            // return developerIdData as T[];
+        } else if (tableName === "apps") {
+            await tx.$executeRawUnsafe("ROLLBACK TO apps_insert");
+            // const appIdData = await getAppIds(tx, rows[0][0]);
+            // return appIdData as T[];
+        }
+        return [] as T[];
     }
 };
 
-const getDeveloperId = async (clientGPS: PoolClient, developerId: string) => {
+export const insertSingleRow = async <T>(
+    tx: PrismaClient,
+    tableName: string,
+    columns: string[],
+    row: any[],
+): Promise<T> => {
+    if (tableName === "developers") {
+        await tx.$executeRawUnsafe("SAVEPOINT developers_insert");
+    } else if (tableName === "apps") {
+        await tx.$executeRawUnsafe("SAVEPOINT apps_insert");
+    }
     try {
-        const result = await clientGPS.query(
-            "SELECT * FROM developers WHERE developer_id = $1",
-            [developerId],
-        );
-        return result.rows;
-    } catch (err) {
-        return [{}];
+        const placeholders = row.map((_, j) => {
+            if (isStringifiedJson(row as any)) {
+                return `$${j + 1}::jsonb`;
+            } else {
+                return `$${j + 1}`;
+            }
+        });
+        const value = `(${placeholders.join(", ")})`;
+
+        const query = `
+        INSERT INTO ${tableName} (${columns.join(", ")})
+        VALUES ${value}
+        RETURNING *;
+      `;
+
+        console.log("Query:", query);
+        console.log("value:", value);
+        console.log("row:", row);
+
+        const result = await tx.$executeRawUnsafe(query, ...row);
+        console.log(result);
+        return result as T;
+    } catch (err: any) {
+        console.log(`insertSingleRow ${tableName} => `, err);
+        await tx.$executeRawUnsafe("ROLLBACK");
+        if (tableName === "developers") {
+            await tx.$executeRawUnsafe("ROLLBACK TO developers_insert");
+            // const developerIdData = await getDeveloperId(tx, row[0]);
+            // return developerIdData as T;
+        } else if (tableName === "apps") {
+            await tx.$executeRawUnsafe("ROLLBACK TO apps_insert");
+            // const appIdData = await getAppIds(tx, row[0]);
+            // return appIdData as T;
+        }
+        return {} as T;
     }
 };
 
-export const getAppId = async (clientGPS: PoolClient, appId: string) => {
+export const getDeveloperId = async (
+    tx: PrismaClient,
+    developerId: string,
+): Promise<developers> => {
     try {
-        const result = await clientGPS.query(
-            "SELECT * FROM apps WHERE app_id = $1",
-            [appId],
-        );
-        return result.rows;
-    } catch (err) {
-        return [{}];
+        const result = await tx.developers.findUnique({
+            where: { developer_id: developerId },
+        });
+        return result as developers;
+    } catch (err: any) {
+        console.log("error in getDeveloperId", err.message);
+        return {} as developers;
     }
 };
 
-export const getAppByAppId = async (clientGPS: PoolClient, appId: string) => {
+export const getAppByAppId = async (
+    tx: PrismaClient,
+    appId: string,
+): Promise<apps> => {
     try {
-        const result = await clientGPS.query(
-            "SELECT * FROM apps WHERE app_id = $1",
-            [appId],
-        );
-        return result.rows[0];
+        const result = await tx.apps.findUnique({
+            where: { app_id: appId },
+        });
+        return result as apps;
     } catch (err: any) {
         console.log("error in getAppByAppId", err.message);
-        return {};
+        return {} as apps;
     }
 };
 
-export const getNAAppByAppId = async (clientGPS: PoolClient, appId: string) => {
+export const getNAAppByAppId = async (
+    tx: PrismaClient,
+    appId: string,
+): Promise<na_apps> => {
     try {
-        const result = await clientGPS.query(
-            "SELECT * FROM na_apps WHERE app_id = $1",
-            [appId],
-        );
-        return result.rows[0];
+        const result = await tx.na_apps.findUnique({
+            where: { app_id: appId },
+        });
+        return result as na_apps;
     } catch (err: any) {
         console.log("error in getNAAppByAppId", err.message);
-        return {};
+        return {} as na_apps;
+    }
+};
+
+export const upsertDeveloper = async (
+    tx: PrismaClient,
+    developerData: Partial<developers>,
+): Promise<developers> => {
+    try {
+        const result = await tx.developers.upsert({
+            where: { developer_id: developerData.developer_id! },
+            create: developerData,
+            update: developerData,
+        });
+        return result as developers;
+    } catch (err: any) {
+        console.log("error in upsertDeveloper", err.message);
+        return {} as developers;
     }
 };
 
 export const getDeveloperByDeveloperId = async (
-    clientGPS: PoolClient,
+    tx: PrismaClient,
     developerId: string,
-) => {
+): Promise<developers> => {
     try {
-        const result = await clientGPS.query(
-            "SELECT * FROM developers WHERE developer_id = $1",
-            [developerId],
-        );
-        return result.rows;
+        const result = await tx.developers.findUnique({
+            where: { developer_id: developerId },
+        });
+        return result as developers;
     } catch (err) {
-        return [];
+        return {} as developers;
     }
 };
 
-export const getOldInstalls = async (clientGPS: PoolClient, appId: string) => {
+export const getOldInstalls = async (
+    tx: PrismaClient,
+    appId: number,
+): Promise<bigint> => {
+    if (!appId) return 0n;
     try {
-        const result = await clientGPS.query(
-            "SELECT current_installs FROM installs WHERE app_id = $1 ORDER BY created_at DESC LIMIT 1",
-            [appId],
-        );
-        return result.rows[0].current_installs;
+        const result = await tx.installs.findMany({
+            select: { current_installs: true },
+            where: { app_id: appId },
+            orderBy: { created_at: "desc" },
+            take: 1,
+        });
+        if (result.length === 0) return 0n;
+        return result[0]?.current_installs as bigint;
     } catch (err) {
-        return 0;
+        return 0n;
     }
 };
 
-export const getAppIds = async (clientGPS: PoolClient, appIds: string[]) => {
-    try {
-        const result = await clientGPS.query(
-            "SELECT app_id FROM apps WHERE app_id = ANY($1::text[])",
-            [appIds],
-        );
-        return result.rows.map((row) => row.app_id);
-    } catch (err) {
-        return [];
-    }
-};
-
-export const getAppIdsPrisma = async (appIds: string[]) => {
+export const getAppIds = async (
+    tx: PrismaClient,
+    appIds: string[],
+): Promise<string[]> => {
     if (appIds.length === 0) return [];
 
     try {
-        const result = await prisma.$queryRaw<{ app_id: string }[]>`
-            SELECT app_id FROM apps WHERE app_id = ANY(${appIds})
-        `;
-        return result.map((row) => row.app_id);
+        const result = await tx.apps.findMany({
+            where: { app_id: { in: appIds } },
+            select: { app_id: true },
+        });
+        return result.map((row: apps) => row.app_id);
     } catch (err: any) {
-        console.log("error in getAppIdsPrisma", err.message);
+        console.log("error in getAppIds", err.message);
+        return [];
+    }
+};
+
+// Note - for testing purposes only
+export const getTestingAppIds = async (tx: PrismaClient): Promise<apps[]> => {
+    try {
+        const result = await tx.$queryRaw`
+            SELECT app_id
+            FROM apps
+            ORDER BY RANDOM()
+            LIMIT 5
+        `;
+        if (result.length === 0) return [];
+        return result as apps[];
+    } catch (err) {
+        console.log("error in getTestingAppIds", err);
         return [];
     }
 };
